@@ -34,7 +34,7 @@ def capture_synchronized():
     file_names = []
     for i in range(len(SLAVE_IPS) + 1):
         file_names.append(generate_filename(i))
-    camera.capture_files(file_names[0])
+    camera.capture_file(file_names[0])
     time.sleep(0.05)  # 50ms pulse
     GPIO.output(GPIO_TRIGGER_PIN, GPIO.LOW)
     # Wait for captures to complete
