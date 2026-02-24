@@ -12,7 +12,7 @@
     img { width: 200px; display: block; }
     figcaption { font-size: 0.7rem; text-align: center; margin-top: 0.25rem; color: #555; }
     .actions { display: flex; gap: 1rem; margin-top: 2rem; }
-    .capture-btn { margin-top: 0.5rem; padding: 0.6rem 2rem; font-family: monospace; font-size: 1rem; background: #eee; color: #111; border: none; cursor: pointer; }
+    .capture-btn { padding: 0.6rem 2rem; font-family: monospace; font-size: 1rem; background: #eee; color: #111; border: none; cursor: pointer; text-decoration: none; display: inline-block; }
     .capture-btn:hover { background: #fff; }
   </style>
 </head>
@@ -30,10 +30,15 @@
             </figure>
           {% endfor %}
         </div>
-        <form action="/wigglegram" method="post">
-          <input type="hidden" name="name" value="{{ group.name }}">
-          <button class="capture-btn" type="submit">Make Wigglegram</button>
-        </form>
+        <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+          <form action="/wigglegram" method="post">
+            <input type="hidden" name="name" value="{{ group.name }}">
+            <button class="capture-btn" type="submit">Make Wigglegram</button>
+          </form>
+          {% if group.wiggle %}
+            <a class="capture-btn" href="/download/{{ group.wiggle }}" download>Download</a>
+          {% endif %}
+        </div>
       </div>
     {% endfor %}
   {% else %}

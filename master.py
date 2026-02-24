@@ -63,7 +63,7 @@ def make_wigglegram():
     name = request.form.get('name')
     folder = os.path.join(IMAGE_SAVE_PATH, name)
     images = sorted(glob.glob(os.path.join(folder, '*.jpg')))
-    out = os.path.join(IMAGE_SAVE_PATH, f"wiggle_{int(time.time())}.mp4")
+    out = os.path.join(folder, 'wiggle.mp4')
     threading.Thread(target=wiggler.generate, args=(images, out), daemon=True).start()
     return redirect(url_for('gallery'))
 
@@ -76,6 +76,10 @@ def capture():
 def serve_image(filename):
     return send_file(os.path.join(IMAGE_SAVE_PATH, filename), mimetype='image/jpeg')
 
+@app.route('/download/<path:filename>')
+def download(filename):
+    return send_file(os.path.join(IMAGE_SAVE_PATH, filename), as_attachment=True)
+
 @app.route('/')
 def gallery():
     subfolders = sorted(glob.glob(os.path.join(IMAGE_SAVE_PATH, '*/')), reverse=True)
@@ -83,8 +87,11 @@ def gallery():
     for folder in subfolders:
         name = os.path.basename(os.path.normpath(folder))
         imgs = sorted(os.path.relpath(f, IMAGE_SAVE_PATH) for f in glob.glob(os.path.join(folder, '*.jpg')))
-        if imgs:
-            groups.append({'name': name, 'images': imgs})
+        if not imgs:
+            continue
+        wiggle_path = os.path.join(folder, 'wiggle.mp4')
+        wiggle = os.path.join(name, 'wiggle.mp4') if os.path.exists(wiggle_path) else None
+        groups.append({'name': name, 'images': imgs, 'wiggle': wiggle})
     return render_template('gallery.html', groups=groups)
 
 # Start trigger listener in background
