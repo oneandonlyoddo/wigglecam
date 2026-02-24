@@ -1,23 +1,35 @@
+# Install Notes
+
+## Dependencies
+
+```bash
 sudo apt update
-sudo apt install -y python3-picamera2
-sudo apt install python3-flask
-sudo apt install git
+sudo apt install -y python3-picamera2 python3-flask git
+```
+
+## Clone the repo
+
+```bash
 git clone git@github.com:oneandonlyoddo/wigglecam.git
+```
 
+## SSH key setup (for VS Code remote access)
 
-
-Adding machines to ssh config for vs code remote access
-
-create key
+**Generate a key** (on your local machine):
+```bash
 ssh-keygen -t ed25519
+```
 
-push key to server
+**Push the key to each Pi:**
+```bash
 ssh-copy-id -i ~/.ssh/key.pub username@host
+```
 
-add hosts to ~/.ssh/config
-
+**Add each Pi to `~/.ssh/config`:**
+```
 Host [hostname]
   HostName 192.168.0.xxx
-  port 22
+  Port 22
   User [username]
-  IdentityFile [path to ssh key] # use \\ on windows
+  IdentityFile [path/to/key]   # use \\ on Windows
+```
