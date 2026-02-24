@@ -3,7 +3,8 @@ import time
 import os
 import glob
 import requests
-from flask import Flask, send_file, render_template, redirect, url_for
+from flask import Flask, send_file, render_template, redirect, url_for, request
+from wigglegram import WigglegramMaker
 from picamera2 import Picamera2
 import RPi.GPIO as GPIO
 from settings import *
@@ -56,6 +57,15 @@ def shutter_listener():
         GPIO.wait_for_edge(GPIO_SHUTTER_PIN, GPIO.RISING)
         time.sleep(GPIO_DEBOUNCE_TIME)  # debounce
         capture_synchronized()
+
+@app.route('/wigglegram', methods=['POST'])
+def make_wigglegram():
+    name = request.form.get('name')
+    folder = os.path.join(IMAGE_SAVE_PATH, name)
+    images = sorted(glob.glob(os.path.join(folder, '*.jpg')))
+    out = os.path.join(IMAGE_SAVE_PATH, f"wiggle_{int(time.time())}.mp4")
+    threading.Thread(target=wiggler.generate, args=(images, out), daemon=True).start()
+    return redirect(url_for('gallery'))
 
 @app.route('/capture', methods=['POST'])
 def capture():

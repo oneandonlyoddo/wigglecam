@@ -12,7 +12,7 @@
     img { width: 200px; display: block; }
     figcaption { font-size: 0.7rem; text-align: center; margin-top: 0.25rem; color: #555; }
     .actions { display: flex; gap: 1rem; margin-top: 2rem; }
-    .capture-btn { padding: 0.6rem 2rem; font-family: monospace; font-size: 1rem; background: #eee; color: #111; border: none; cursor: pointer; }
+    .capture-btn { margin-top: 0.5rem; padding: 0.6rem 2rem; font-family: monospace; font-size: 1rem; background: #eee; color: #111; border: none; cursor: pointer; }
     .capture-btn:hover { background: #fff; }
   </style>
 </head>
@@ -30,18 +30,17 @@
             </figure>
           {% endfor %}
         </div>
+        <form action="/wigglegram" method="post">
+          <input type="hidden" name="name" value="{{ group.name }}">
+          <button class="capture-btn" type="submit">Make Wigglegram</button>
+        </form>
       </div>
     {% endfor %}
   {% else %}
     <p>No images yet.</p>
   {% endif %}
-  <div class="actions">
-    <form action="/capture" method="post">
-      <button class="capture-btn" type="submit">Capture</button>
-    </form>
-    <form action="/wigglegram" method="post">
-      <button class="capture-btn" type="submit">Make Wigglegram</button>
-    </form>
-  </div>
+  <form action="/capture" method="post" style="margin-top: 2rem;">
+    <button class="capture-btn" type="submit">Capture</button>
+  </form>
 </body>
 </html>
