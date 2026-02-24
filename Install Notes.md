@@ -1,5 +1,6 @@
 sudo apt update
 sudo apt install -y python3-picamera2
+sudo apt install python3-flask
 sudo apt install git
 git clone git@github.com:oneandonlyoddo/wigglecam.git
 
