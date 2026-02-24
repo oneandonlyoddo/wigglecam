@@ -4,7 +4,7 @@
 
 ```bash
 sudo apt update
-sudo apt install -y python3-picamera2 python3-flask git
+sudo apt install -y python3-picamera2 python3-flask python3-opencv git
 ```
 
 ## Clone the repo
