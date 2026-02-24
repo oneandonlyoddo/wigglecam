@@ -7,6 +7,7 @@ from flask import Flask, send_file, render_template, redirect, url_for
 from picamera2 import Picamera2, Preview
 import RPi.GPIO as GPIO
 from settings import *
+import threading
 
 SLAVE_IPS = ['192.168.0.162']
 
@@ -14,6 +15,8 @@ SLAVE_IPS = ['192.168.0.162']
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(GPIO_TRIGGER_PIN, GPIO.OUT)
 GPIO.output(GPIO_TRIGGER_PIN, GPIO.LOW)
+GPIO.setup(GPIO_SHUTTER_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
 
 camera = Picamera2()
 camera.configure(camera.create_still_configuration())
@@ -54,6 +57,12 @@ def capture_synchronized():
 
     print("All images collected!")
 
+def shutter_listener():
+    while True:
+        GPIO.wait_for_edge(GPIO_SHUTTER_PIN, GPIO.RISING)
+        time.sleep(GPIO_DEBOUNCE_TIME)  # debounce
+        capture_synchronized()
+
 @app.route('/capture', methods=['POST'])
 def capture():
     capture_synchronized()
@@ -70,6 +79,9 @@ def gallery():
         reverse=True
     )
     return render_template('gallery.html', images=images)
+
+# Start trigger listener in background
+threading.Thread(target=shutter_listener, daemon=True).start()
 
 if __name__ == '__main__':
     try:
