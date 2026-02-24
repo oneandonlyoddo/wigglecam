@@ -31,7 +31,10 @@ def capture_synchronized():
     print("Triggering capture...")
     # Trigger all cameras including self
     GPIO.output(GPIO_TRIGGER_PIN, GPIO.HIGH)
-    camera.capture_file(generate_filename(0))
+    file_names = []
+    for i in range(len(SLAVE_IPS) + 1):
+        file_names.append(generate_filename(i))
+    camera.capture_files(file_names[0])
     time.sleep(0.05)  # 50ms pulse
     GPIO.output(GPIO_TRIGGER_PIN, GPIO.LOW)
     # Wait for captures to complete
@@ -42,7 +45,7 @@ def capture_synchronized():
         try:
             print(f"Fetching from slave {i+1}...")
             response = requests.get(f'http://{ip}:5000/get_image', timeout=5)
-            path = os.path.join(IMAGE_SAVE_PATH, f"slave_{i+1}.jpg")
+            path = os.path.join(file_names[i+1])
             with open(path, 'wb') as f:
                 f.write(response.content)
             print(f"Saved {path}")
