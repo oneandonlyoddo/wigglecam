@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+  <title>Wigglecam</title>
+  <style>
+    body { font-family: monospace; background: #111; color: #eee; margin: 1rem; }
+    figure { display: inline-block; margin: 0.5rem; vertical-align: top; }
+    img { max-width: 320px; display: block; }
+    figcaption { font-size: 0.75rem; text-align: center; margin-top: 0.25rem; color: #aaa; }
+  </style>
+</head>
+<body>
+  <h2>Wigglecam Gallery</h2>
+  {% if images %}
+    {% for f in images %}
+      <figure>
+        <img src="/images/{{ f }}">
+        <figcaption>{{ f }}</figcaption>
+      </figure>
+    {% endfor %}
+  {% else %}
+    <p>No images yet.</p>
+  {% endif %}
+</body>
+</html>
