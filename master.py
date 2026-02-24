@@ -2,9 +2,8 @@
 import time
 import os
 import glob
-import threading
 import requests
-from flask import Flask, send_file, render_template
+from flask import Flask, send_file, render_template, redirect, url_for
 from picamera2 import Picamera2, Preview
 import RPi.GPIO as GPIO
 from settings import *
@@ -52,6 +51,11 @@ def capture_synchronized():
 
     print("All images collected!")
 
+@app.route('/capture', methods=['POST'])
+def capture():
+    capture_synchronized()
+    return redirect(url_for('gallery'))
+
 @app.route('/images/<filename>')
 def serve_image(filename):
     return send_file(os.path.join(IMAGE_SAVE_PATH, filename), mimetype='image/jpeg')
@@ -66,11 +70,6 @@ def gallery():
 
 if __name__ == '__main__':
     try:
-        threading.Thread(target=lambda: app.run(host='0.0.0.0', port=5000), daemon=True).start()
-        print("Gallery running at http://0.0.0.0:5000")
-        capture_synchronized()
-        # Keep alive so Flask keeps serving
-        while True:
-            time.sleep(1)
+        app.run(host='0.0.0.0', port=5000)
     finally:
         GPIO.cleanup()
