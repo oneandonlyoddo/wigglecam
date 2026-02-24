@@ -1,6 +1,9 @@
 from picamera2 import Picamera2
 import RPi.GPIO as GPIO
+import os
 from settings import *
+
+os.makedirs("./tmp", exist_ok=True)
 
 camera = Picamera2()
 camera.configure(camera.create_still_configuration())
