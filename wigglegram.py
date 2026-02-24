@@ -219,14 +219,17 @@ class WigglegramMaker:
         self.boomerang = boomerang
         self.boomerang_count = boomerang_count
 
-    def generate(self, image_paths, output_path, cx=None, cy=None, resolution=None):
+    def generate(self, image_paths, output_path, cx=None, cy=None, resolution=(1280,720), detection_scale=0.25):
         """Align images and write a wigglegram MP4.
 
         Args:
-            image_paths: Ordered list of image file paths (≥ 2).
-            output_path: Destination .mp4 path.
-            cx, cy:      Anchor search centre (defaults to image centre).
-            resolution:  Optional (width, height) tuple to crop/scale output.
+            image_paths:     Ordered list of image file paths (≥ 2).
+            output_path:     Destination .mp4 path.
+            cx, cy:          Anchor search centre (defaults to image centre).
+            resolution:      Optional (width, height) tuple to crop/scale output.
+            detection_scale: Fraction to scale grayscale images before pattern
+                             detection (default 0.25). Lower values are faster;
+                             offsets are rescaled back to full resolution.
 
         Returns:
             output_path on success.
@@ -252,22 +255,35 @@ class WigglegramMaker:
 
         grays = [cv2.cvtColor(im, cv2.COLOR_BGR2GRAY) for im in imgs]
 
+        s = detection_scale
+        if s < 1.0:
+            det_grays = [cv2.resize(g, (0, 0), fx=s, fy=s, interpolation=cv2.INTER_AREA) for g in grays]
+            print(f"  Detection scale {s:.0%}  ({det_grays[0].shape[1]} x {det_grays[0].shape[0]})")
+        else:
+            det_grays = grays
+        det_patch  = max(8, int(self.patch_size    * s))
+        det_radius = max(8, int(self.search_radius * s))
+        det_margin = max(det_patch, int(self.search_margin * s))
+        det_cx, det_cy = int(ax_centre * s), int(ay_centre * s)
+
         print("Finding anchor pattern...")
-        ax, ay = _find_distinct_anchor(
-            grays[0], ax_centre, ay_centre,
-            search_radius=self.search_radius,
-            patch_size=self.patch_size,
+        ax_d, ay_d = _find_distinct_anchor(
+            det_grays[0], det_cx, det_cy,
+            search_radius=det_radius,
+            patch_size=det_patch,
         )
+        ax, ay = int(round(ax_d / s)), int(round(ay_d / s))
         print(f"  Anchor at ({ax}, {ay})")
 
         print("Aligning frames...")
         offsets = [(0.0, 0.0)]
         for i in range(1, len(imgs)):
-            dx, dy, conf = _match_anchor(
-                grays[0], grays[i], ax, ay,
-                patch_size=self.patch_size,
-                search_margin=self.search_margin,
+            dx_d, dy_d, conf = _match_anchor(
+                det_grays[0], det_grays[i], ax_d, ay_d,
+                patch_size=det_patch,
+                search_margin=det_margin,
             )
+            dx, dy = dx_d / s, dy_d / s
             offsets.append((dx, dy))
             print(f"  Frame {i + 1}: dx={dx:+.2f}  dy={dy:+.2f}  confidence={conf:.4f}")
             if conf < 0.5:
